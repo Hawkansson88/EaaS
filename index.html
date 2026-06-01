@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solenergi Norr — El & värme som tjänst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --paper:#F6F1E7;
+    --paper-2:#EFE8D8;
+    --ink:#16261F;
+    --pine:#1C3A2E;
+    --pine-deep:#122620;
+    --sun:#E9A23B;
+    --sun-soft:#F2C77A;
+    --aurora:#3E8E7E;
+    --line:rgba(22,38,31,.14);
+    --good:#2E7D54;
+    --warn:#B4541C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Hanken Grotesk',sans-serif;
+    font-size:17px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;line-height:1.05;letter-spacing:-.01em}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .accent{color:var(--sun)}
+  .pine-accent{color:var(--aurora)}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:50;background:rgba(246,241,231,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:600;font-size:20px;letter-spacing:-.01em}
+  .logo .mark{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--sun-soft),var(--sun) 60%,#c97f1e);box-shadow:0 0 0 4px rgba(233,162,59,.18)}
+  .navlinks{display:flex;gap:28px;font-size:15px;font-weight:500}
+  .navlinks a{color:var(--ink);text-decoration:none;opacity:.7;transition:opacity .2s}
+  .navlinks a:hover{opacity:1}
+  .btn{display:inline-block;background:var(--pine);color:#F6F1E7;padding:11px 22px;border-radius:100px;font-weight:600;font-size:15px;text-decoration:none;border:none;cursor:pointer;transition:transform .15s,background .2s}
+  .btn:hover{transform:translateY(-1px);background:var(--pine-deep)}
+  .btn.sun{background:var(--sun);color:var(--pine-deep)}
+  .btn.sun:hover{background:#dd9226}
+  @media(max-width:760px){.navlinks{display:none}}
+
+  /* HERO */
+  header{position:relative;padding:90px 0 80px;overflow:hidden}
+  header::after{
+    content:"";position:absolute;top:-180px;right:-160px;width:560px;height:560px;border-radius:50%;
+    background:radial-gradient(circle,rgba(233,162,59,.55),rgba(242,199,122,.18) 45%,transparent 70%);
+    filter:blur(8px);z-index:0;
+  }
+  .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--pine);background:var(--paper-2);border:1px solid var(--line);padding:7px 14px;border-radius:100px;margin-bottom:26px}
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(46,125,84,.18)}
+  h1.title{font-size:clamp(40px,6vw,66px);font-weight:600}
+  h1.title em{font-style:italic;color:var(--aurora)}
+  .lead{font-size:20px;line-height:1.5;margin:24px 0 32px;max-width:520px;opacity:.85}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .hero-note{font-size:14px;opacity:.6;margin-top:18px}
+  .hero-card{position:relative;background:var(--pine);color:var(--paper);border-radius:24px;padding:30px;box-shadow:0 30px 60px -28px rgba(18,38,32,.55)}
+  .hero-card h3{color:var(--sun-soft);font-size:15px;font-weight:500;font-family:'Hanken Grotesk';text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+  .hero-card .big{font-family:'Fraunces';font-size:54px;font-weight:600;line-height:1;color:#fff}
+  .hero-card .big span{font-size:20px;opacity:.7}
+  .hero-card .sub{opacity:.65;font-size:14px;margin-top:8px}
+  .hero-card hr{border:none;border-top:1px solid rgba(255,255,255,.14);margin:22px 0}
+  .hc-row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0}
+  .hc-row span:last-child{font-weight:600;color:var(--sun-soft)}
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:36px}}
+
+  /* STRIP */
+  .strip{background:var(--pine-deep);color:var(--paper);padding:18px 0}
+  .strip .wrap{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;font-size:15px;opacity:.92}
+  .strip b{color:var(--sun-soft);font-weight:600}
+
+  /* SECTIONS */
+  section{padding:84px 0}
+  .sec-head{max-width:640px;margin-bottom:48px}
+  .sec-head .eyebrow{margin-bottom:18px}
+  .sec-head h2{font-size:clamp(30px,4vw,44px)}
+  .sec-head p{font-size:18px;opacity:.8;margin-top:16px}
+
+  /* HOW */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .step{background:var(--paper-2);border:1px solid var(--line);border-radius:20px;padding:30px 26px;position:relative}
+  .step .num{font-family:'Fraunces';font-size:46px;font-weight:600;color:var(--sun);line-height:1}
+  .step h3{font-size:21px;margin:14px 0 10px}
+  .step p{opacity:.8;font-size:15.5px}
+  @media(max-width:760px){.steps{grid-template-columns:1fr}}
+
+  /* CALCULATOR */
+  #kalkyl{background:linear-gradient(180deg,var(--paper),var(--paper-2))}
+  .calc{display:grid;grid-template-columns:.95fr 1.05fr;gap:0;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:var(--paper);box-shadow:0 40px 80px -50px rgba(18,38,32,.5)}
+  .calc-inputs{padding:38px 36px;border-right:1px solid var(--line)}
+  .calc-out{padding:38px 36px;background:var(--pine);color:var(--paper)}
+  .field{margin-bottom:22px}
+  .field label{display:block;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.7;margin-bottom:9px}
+  .field .hint{font-weight:400;text-transform:none;letter-spacing:0;opacity:.85;font-size:13px}
+  input[type=number],select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-family:inherit;font-size:16px;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--sun)}
+  .rangeval{font-family:'Fraunces';font-size:20px;font-weight:600;color:var(--pine)}
+  .presets{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .preset{font-size:13px;padding:6px 12px;border-radius:100px;border:1px solid var(--line);background:#fff;cursor:pointer;transition:.15s}
+  .preset:hover{border-color:var(--sun);color:var(--warn)}
+  .toggles{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .tog{flex:1;min-width:120px;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer;text-align:left;transition:.15s;font-family:inherit}
+  .tog.on{border-color:var(--aurora);background:rgba(62,142,126,.08);box-shadow:0 0 0 2px rgba(62,142,126,.18)}
+  .tog .t-name{font-weight:600;font-size:15px;display:flex;align-items:center;gap:7px}
+  .tog .dot{width:10px;height:10px;border-radius:50%;background:#cdc6b5}
+  .tog.on .dot{background:var(--aurora)}
+  .tog .t-desc{font-size:12.5px;opacity:.7;margin-top:3px}
+
+  /* OUTPUT */
+  .out-fee{text-align:center;padding:6px 0 18px}
+  .out-fee .label{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--sun-soft);opacity:.9}
+  .out-fee .amount{font-family:'Fraunces';font-size:62px;font-weight:600;line-height:1;color:#fff;margin-top:6px}
+  .out-fee .amount span{font-size:22px;opacity:.7}
+  .out-fee .note{font-size:13px;opacity:.6;margin-top:8px}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}
+  .cmp{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px}
+  .cmp .k{font-size:12.5px;opacity:.65;text-transform:uppercase;letter-spacing:.08em}
+  .cmp .v{font-family:'Fraunces';font-size:26px;font-weight:600;margin-top:4px}
+  .cmp.now .v{color:var(--sun-soft)}
+  .cmp.svc .v{color:#fff}
+  .verdict{border-radius:14px;padding:14px 16px;font-size:15px;font-weight:500;margin-bottom:18px}
+  .verdict.win{background:rgba(46,125,84,.22);border:1px solid rgba(90,200,140,.4)}
+  .verdict.even{background:rgba(233,162,59,.18);border:1px solid rgba(233,162,59,.4)}
+  .verdict b{color:#fff}
+  .chartbox{background:rgba(255,255,255,.05);border-radius:16px;padding:16px 14px 8px}
+  .chartbox h4{font-size:13px;text-transform:uppercase;letter-spacing:.1em;opacity:.7;margin-bottom:10px;font-family:'Hanken Grotesk';font-weight:600}
+  .chart-canvas{position:relative;height:210px;width:100%}
+  .pkg-list{font-size:14px;margin:4px 0 0}
+  .pkg-list li{list-style:none;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between}
+  .pkg-list li:last-child{border:none}
+  .pkg-list .pkg-em{opacity:.65}
+  @media(max-width:880px){.calc{grid-template-columns:1fr}.calc-inputs{border-right:none;border-bottom:1px solid var(--line)}}
+
+  /* WHY GRID */
+  .why{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .why .card{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:26px}
+  .why .card .ic{font-size:26px;margin-bottom:10px}
+  .why .card h3{font-size:19px;margin-bottom:8px}
+  .why .card p{opacity:.8;font-size:15px}
+  @media(max-width:760px){.why{grid-template-columns:1fr}}
+
+  /* CTA */
+  .cta{background:var(--pine);color:var(--paper);border-radius:28px;padding:56px;text-align:center;position:relative;overflow:hidden}
+  .cta::before{content:"";position:absolute;bottom:-160px;left:50%;transform:translateX(-50%);width:520px;height:320px;background:radial-gradient(ellipse,rgba(233,162,59,.4),transparent 70%)}
+  .cta h2{font-size:clamp(28px,4vw,42px);position:relative}
+  .cta p{opacity:.8;max-width:480px;margin:16px auto 28px;position:relative}
+
+  footer{padding:50px 0 40px;border-top:1px solid var(--line);margin-top:60px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;font-size:14px;opacity:.7}
+  .disclaimer{font-size:12.5px;opacity:.55;max-width:720px;margin-top:14px;line-height:1.5}
+
+  /* DEVELOPER INFO */
+  .dev-btn{position:fixed;right:18px;bottom:18px;z-index:200;display:inline-flex;align-items:center;gap:8px;
+    background:var(--pine-deep);color:var(--sun-soft);border:1px solid rgba(233,162,59,.35);
+    font-family:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;letter-spacing:.02em;
+    padding:10px 15px;border-radius:100px;cursor:pointer;box-shadow:0 10px 30px -12px rgba(0,0,0,.5);transition:transform .15s,background .2s}
+  .dev-btn:hover{transform:translateY(-2px);background:#0d1b16}
+  .dev-btn .blip{width:8px;height:8px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px rgba(233,162,59,.2);animation:blip 2.4s infinite}
+  @keyframes blip{0%,100%{opacity:1}50%{opacity:.35}}
+  .dev-overlay{position:fixed;inset:0;z-index:300;background:rgba(10,18,15,.72);backdrop-filter:blur(6px);
+    display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .dev-overlay.open{display:flex}
+  .dev-panel{background:#0E1C17;color:#E7EFE9;max-width:860px;width:100%;border:1px solid rgba(233,162,59,.25);
+    border-radius:20px;padding:38px 40px 44px;box-shadow:0 40px 100px -30px rgba(0,0,0,.7);
+    font-family:'Hanken Grotesk',sans-serif;position:relative;margin:auto}
+  .dev-panel h2{font-family:'Fraunces',serif;color:#fff;font-size:30px;margin-bottom:4px}
+  .dev-panel .dev-tag{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--sun-soft);
+    letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:18px;opacity:.8}
+  .dev-panel h3{font-family:'Fraunces',serif;color:var(--sun-soft);font-size:19px;margin:26px 0 10px;
+    border-top:1px solid rgba(255,255,255,.1);padding-top:20px}
+  .dev-panel h3:first-of-type{border-top:none;padding-top:0}
+  .dev-panel p{font-size:15px;line-height:1.6;opacity:.9;margin-bottom:10px}
+  .dev-panel ul{list-style:none;margin:0 0 6px}
+  .dev-panel li{font-size:14.5px;line-height:1.55;padding:5px 0 5px 20px;position:relative;opacity:.92}
+  .dev-panel li::before{content:"▸";position:absolute;left:0;color:var(--sun);opacity:.8}
+  .dev-panel li b{color:#fff}
+  .dev-panel .sub{margin-left:18px;border-left:1px solid rgba(255,255,255,.12);padding-left:14px}
+  .dev-panel .note{background:rgba(233,162,59,.1);border:1px solid rgba(233,162,59,.25);border-radius:12px;
+    padding:14px 16px;font-size:13.5px;line-height:1.55;margin:8px 0 4px}
+  .dev-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:50%;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:20px;
+    cursor:pointer;line-height:1;transition:background .2s}
+  .dev-close:hover{background:rgba(255,255,255,.18)}
+  .dev-panel .dev-foot{margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);
+    font-size:12px;font-family:ui-monospace,Menlo,monospace;opacity:.5}
+  @media(max-width:600px){.dev-panel{padding:30px 22px 34px}.dev-panel h2{font-size:24px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><span class="mark"></span>Solenergi Norr</div>
+    <div class="navlinks">
+      <a href="#sahar">Så fungerar det</a>
+      <a href="#kalkyl">Räkna på det</a>
+      <a href="#varfor">Varför tjänst</a>
+    </div>
+    <a href="#kalkyl" class="btn">Räkna på din villa</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">El &amp; värme som tjänst · Jämtland &amp; Västernorrland</span>
+      <h1 class="title">Sluta köpa kilowattimmar.<br>Köp ett <em>varmt hem</em> — till fast pris.</h1>
+      <p class="lead">Vi installerar, äger och sköter solceller, batteri och värmepump. Du betalar en fast månadsavgift. Vi ser till att just ditt hem blir så energieffektivt som möjligt — och tar all risk.</p>
+      <div class="hero-cta">
+        <a href="#kalkyl" class="btn sun">Räkna ut ditt pris →</a>
+        <a href="#sahar" class="btn" style="background:transparent;color:var(--pine);border:1px solid var(--line)">Hur funkar det?</a>
+      </div>
+      <p class="hero-note">Noll investering · Inga oväntade räkningar · Vi optimerar löpande</p>
+    </div>
+    <div class="hero-card">
+      <h3>Exempel · villa i Östersund</h3>
+      <div class="big">3&nbsp;200<span> kr/mån</span></div>
+      <div class="sub">Fast avgift i 15 år — oavsett elpris.</div>
+      <hr>
+      <div class="hc-row"><span>Du betalar idag (el + värme)</span><span>~3&nbsp;540 kr/mån</span></div>
+      <div class="hc-row"><span>Med Solenergi Norr</span><span>förutsägbart</span></div>
+      <div class="hc-row"><span>Investering från dig</span><span>0 kr</span></div>
+      <div class="hc-row"><span>Risk om något går sönder</span><span>Vår</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="wrap">
+    <div>📍 Anpassat för <b>Norrlands</b> klimat &amp; elområde SE2</div>
+    <div>🔧 Vi äger &amp; servar <b>all utrustning</b></div>
+    <div>📈 Skyddad mot <b>stigande elpriser</b></div>
+  </div>
+</div>
+
+<section id="sahar">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Så fungerar det</span>
+      <h2>Ett abonnemang på ett effektivt hem</h2>
+      <p>Inte en produkt du köper och måste sköta själv — utan en tjänst där vi ansvarar för att din energi blir billigare och tryggare.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Vi analyserar ditt hem</h3>
+        <p>Förbrukning, uppvärmning, tak och läge. Vi räknar ut vad som ger mest effekt — solceller, batteri, värmepump eller en kombination.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Vi installerar &amp; äger</h3>
+        <p>Vi står för hela investeringen och installationen. Du betalar inget upfront och äger ingen risk för krångel eller reparationer.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Du betalar fast pris</h3>
+        <p>En fast månadsavgift under avtalstiden. Vi optimerar och servar löpande så att hemmet alltid kör så effektivt som möjligt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="kalkyl">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Räkna på det</span>
+      <h2>Vad skulle det kosta dig?</h2>
+      <p>Fyll i några uppgifter om ditt hem så föreslår vi ett paket och visar din fasta månadsavgift — jämfört med vad du betalar idag.</p>
+    </div>
+
+    <div class="calc">
+      <div class="calc-inputs">
+        <div class="field">
+          <label id="consLabel">Din elförbrukning per år <span class="hint">(inkl. uppvärmning)</span></label>
+          <input type="number" id="consumption" value="25000" min="2000" max="60000" step="500">
+          <div class="presets" id="consPresets">
+            <span class="preset" data-c="15000">Mindre hus ~15 000</span>
+            <span class="preset" data-c="25000">Villa ~25 000</span>
+            <span class="preset" data-c="35000">Stort hus ~35 000</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Hur värmer du upp idag?</label>
+          <select id="heating">
+            <option value="direktel">Direktverkande el</option>
+            <option value="olja">Olja / ved / pellets</option>
+            <option value="fjarrvarme">Fjärrvärme</option>
+            <option value="luftluft">Luft/luft-värmepump (befintlig)</option>
+            <option value="effektiv">Luft/vatten eller bergvärme (befintlig)</option>
+          </select>
+        </div>
+
+        <div class="field" id="fjarrField" style="display:none">
+          <label>Din fjärrvärmekostnad per år <span class="hint">kr, allt inkl.</span></label>
+          <input type="number" id="fjarrKr" value="17000" min="3000" max="50000" step="500">
+        </div>
+
+        <div class="field" id="waterborneField">
+          <label>Har huset vattenburet system idag? <span class="hint">radiatorer/golvvärme med vatten</span></label>
+          <select id="waterborne">
+            <option value="ja">Ja</option>
+            <option value="nej">Nej</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Ditt elpris idag <span class="hint">kr/kWh, allt inkl. (nät, skatt, moms)</span></label>
+          <input type="number" id="price" value="1.7" min="0.5" max="5" step="0.1">
+        </div>
+
+        <div class="field">
+          <label>Lämpligt tak för solceller?</label>
+          <select id="roof">
+            <option value="ja">Ja, bra läge</option>
+            <option value="delvis">Delvis / mindre yta</option>
+            <option value="nej">Nej / vill inte</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Antagen elprisökning <span class="hint">% per år</span></label>
+          <input type="range" id="incr" min="0" max="8" value="4" step="0.5">
+          <div class="rangeval"><span id="incrVal">4</span> % / år</div>
+        </div>
+
+        <div class="field">
+          <label>Avtalstid</label>
+          <select id="term">
+            <option value="10">10 år</option>
+            <option value="15" selected>15 år</option>
+            <option value="20">20 år</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom:6px">
+          <label>Justera ditt paket</label>
+          <div class="toggles">
+            <button class="tog on" id="togHP" data-on="1"><div class="t-name"><span class="dot"></span>Värmepump</div><div class="t-desc" id="hpDesc">Rekommenderas</div></button>
+            <button class="tog on" id="togPV" data-on="1"><div class="t-name"><span class="dot"></span>Solceller</div><div class="t-desc" id="pvDesc">Rekommenderas</div></button>
+            <button class="tog on" id="togBatt" data-on="1"><div class="t-name"><span class="dot"></span>Batteri</div><div class="t-desc" id="battDesc">Rekommenderas</div></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-out">
+        <div class="out-fee">
+          <div class="label">Din fasta månadsavgift</div>
+          <div class="amount" id="feeOut">– <span>kr/mån</span></div>
+          <div class="note" id="feeNote">Fast i hela avtalstiden</div>
+        </div>
+
+        <div class="verdict win" id="verdict">Räknar…</div>
+
+        <div class="compare">
+          <div class="cmp now">
+            <div class="k">Idag, år 1</div>
+            <div class="v" id="nowMonth">– kr/mån</div>
+          </div>
+          <div class="cmp svc">
+            <div class="k">Med oss, år 1</div>
+            <div class="v" id="svcMonth">– kr/mån</div>
+          </div>
+        </div>
+
+        <div class="chartbox">
+          <h4>Ackumulerad kostnad över avtalstiden</h4>
+          <div class="chart-canvas"><canvas id="chart"></canvas></div>
+        </div>
+
+        <ul class="pkg-list" id="pkgList"></ul>
+      </div>
+    </div>
+    <p class="disclaimer" id="assump"></p>
+  </div>
+</section>
+
+<section id="varfor">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Varför tjänst i stället för köp</span>
+      <h2>Du slipper kapitalet, krånglet och risken</h2>
+    </div>
+    <div class="why">
+      <div class="card"><div class="ic">💸</div><h3>Noll investering</h3><p>Du behöver inte låna 200–400 000 kr eller binda eget kapital. Vi tar investeringen — du betalar en avgift.</p></div>
+      <div class="card"><div class="ic">🛡️</div><h3>Vi bär all risk</h3><p>Går något sönder, presterar pumpen sämre eller faller elpriset — det är vårt problem, inte ditt. Avgiften är fast.</p></div>
+      <div class="card"><div class="ic">🔄</div><h3>Vi optimerar löpande</h3><p>Vi övervakar och justerar styrningen efter elpris och väder, så hemmet alltid kör så effektivt som möjligt.</p></div>
+      <div class="card"><div class="ic">🧊</div><h3>Byggt för Norrland</h3><p>Vi dimensionerar för riktig kyla och korta vinterdagar — inte för ett hus i Skåne. Realistiska siffror för elområde SE2.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:20px">
+  <div class="wrap">
+    <div class="cta">
+      <h2>Boka en kostnadsfri hemanalys</h2>
+      <p>Vi tittar på just ditt hem och ger dig en exakt offert på din fasta månadsavgift. Utan förpliktelser.</p>
+      <a href="#" class="btn sun" style="position:relative">Boka analys →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><strong>Solenergi Norr</strong> · solenerginorr.se · Östersund &amp; Sundsvall</div>
+    <div>Prototyp / demo — siffror är räkneexempel.</div>
+  </div>
+</footer>
+
+<button class="dev-btn" id="devBtn"><span class="blip"></span>Developer-info</button>
+
+<div class="dev-overlay" id="devOverlay">
+  <div class="dev-panel">
+    <button class="dev-close" id="devClose" aria-label="Stäng">×</button>
+    <span class="dev-tag">// Internt · för styrelsen i Solenergi Norr</span>
+    <h2>Vad du tittar på &amp; affärsidén bakom</h2>
+
+    <h3>Vad är den här sidan?</h3>
+    <ul>
+      <li>En <b>prototyp/konceptdemo</b> av en produkt: el och värme sålt <b>som tjänst</b> till privatpersoner, i stället för att de köper utrustning själva.</li>
+      <li>Syftet är att <b>förklara konceptet och visa kalkylen</b> — inte att vara färdig produktionssida. Alla siffror är räkneexempel.</li>
+      <li>Kalkylatorn låter en kund fylla i sitt hus och se en föreslagen lösning + en fast månadsavgift jämfört med dagens kostnad, med stigande elpris över avtalstiden.</li>
+    </ul>
+
+    <h3>Produkten i en mening</h3>
+    <ul>
+      <li>Vi <b>äger, installerar och sköter</b> solceller, batteri och/eller värmepump i kundens hem. Kunden betalar en <b>fast månadsavgift</b> och slipper investering, drift och risk.</li>
+      <li>Vår uppgift: se till att just det hemmet blir så energieffektivt som möjligt. <b>Ju mindre kunden förbrukar, desto bättre marginal för oss.</b></li>
+    </ul>
+
+    <h3>Affärsmodellen — tre intäktsben</h3>
+    <ul>
+      <li><b>1. Fast avgift (basen):</b> täcker amortering av utrustningen (vår grossist-/inköpskostnad), drift/övervakning/service samt marginal. Annuitetsberäknad över avtalstiden.</li>
+      <li><b>2. Energispread (nästa steg):</b> vi buntar in även elförbrukningen i den fasta avgiften. Kunden byter sin elräkning mot <b>en faktura från oss</b>. Skillnaden mellan avgiften och vår faktiska energikostnad är vår spread.</li>
+      <li><b>3. Flexibilitet / virtuellt kraftverk (skalfördelen):</b> med många hem fulla av batterier, pumpar och elbilsladdare kan vi sälja effektkapning och stödtjänster (FCR m.m.) till elsystemet.</li>
+    </ul>
+
+    <h3>Varför incitamentet är unikt</h3>
+    <ul>
+      <li>Ett vanligt elbolag tjänar mer när kunden använder <b>mer</b> el. Vår modell tjänar mer när kunden använder <b>mindre</b> — eftersom vi behåller spreaden. Hela branschens incitament vänds. Det är både en ärlig säljstory och vår drivkraft att optimera.</li>
+    </ul>
+
+    <h3>Målgrupper — var ekonomin finns</h3>
+    <ul>
+      <li><b>Direktel &amp; olja/ved = starkast.</b> De betalar dyrt 1:1 för el/bränsle idag, så en värmepump + sol kapar mycket → snabb lönsamhet.</li>
+      <li><b>Vattenburet system avgör capex.</b> Finns vattenburet (radiatorer/golvvärme) kan vi sätta en luft/vatten- eller bergvärmepump direkt. Saknas det (rena direktelhus) tillkommer en dyr konvertering (~80 tkr) — då väljer vi i stället luft/luft.</li>
+      <li><b>Fjärrvärme:</b> strukturellt enkelt (vattenburet finns), men i Östersund är fjärrvärmen så billig att ett pumpbyte ofta går back rent ekonomiskt. Säljs på <b>förutsägbarhet och oberoende</b>, inte på "billigare".</li>
+    </ul>
+
+    <h3>Fakturering &amp; energibuntning (så genomförs steg 2)</h3>
+    <ul>
+      <li>För att kunden ska byta sin elräkning mot vår, måste vi vara kundens registrerade <b>elhandlare</b>.</li>
+      <li>Vi gör det via <b>white-label</b>: eget varumärke på en färdig plattform som sköter leverantörsbyte, mätvärden, avräkning och fakturering — och <b>balansansvaret läggs ut på partner</b>. Vi behåller kundrelationen och spreaden utan att bygga hela back-office.</li>
+      <li>Kunden behåller sitt <b>nätavtal med Jämtkraft</b> (oförändrat) och får i övrigt <b>en samlad faktura från oss</b>: elhandel + tjänsteavgift på samma rad-uppställning.</li>
+    </ul>
+    <div class="note"><b>Obs för styrelsen:</b> kalkylatorn ovan visar idag <b>hybridvarianten</b> (fast avgift + kundens kvarvarande elkostnad). Den fullt buntade modellen (en faktura, energin inkluderad) är vägvalet för nästa steg — det är ett medvetet beslut som tas separat eftersom det innebär att vi tar el-pris- och volymrisk.</div>
+
+    <h3>Elnät &amp; effekt</h3>
+    <ul>
+      <li>Elnätsavgiften är en <b>monopolkostnad</b> kunden betalar direkt till nätbolaget. Vi håller den <b>utanför</b> vår avgift (vi vill inte ta en kostnad vi inte styr) och är transparenta med det.</li>
+      <li><b>Men det är en säljpoäng:</b> batteri + smart styrning <b>kapar effekttoppar</b> och håller kundens effektavgift nere. "Nätavgiften rör vi inte — men vår styrning ser till att den inte rusar."</li>
+      <li>Effekttariffer: regeringen <b>stoppade tvångskravet 13 mars 2026</b>, men de är inte förbjudna och EU-regler driver fortsatt åt kostnadsspeglande tariffer. Riktningen mot effektprissättning står kvar — och spelar oss i händerna.</li>
+    </ul>
+
+    <h3>Elbilen (i ett 15-årsperspektiv)</h3>
+    <ul>
+      <li>I princip alla kunder får elbil inom avtalstiden. Den lägger på ~2 500–4 000 kWh/år <b>och</b> en laddtopp.</li>
+      <li>Hanteras som en <b>flexibilitetstillgång</b> (smart laddning på sol/natt/lågpris) och som en <b>uppförsäljning</b> (laddbox + utökad styrning), inte som ett problem.</li>
+      <li>Avtalet bör ha en <b>omdimensioneringsklausul</b>: vid väsentlig förändring (elbil, pool, tillbyggnad) får parterna se över dimensionering och avgift.</li>
+    </ul>
+
+    <h3>Flexibilitet / VPP — den stora uppsidan</h3>
+    <ul>
+      <li>Stödtjänster kräver minst 100 kW i bud → en enskild villa räcker inte, men <b>vår aggregerade kundbas gör det</b>.</li>
+      <li>Start: anslut våra batterier till en befintlig <b>aggregator</b> (CheckWatt/Flower/Greenely). Vid skala: ta hem aggregeringen själva.</li>
+      <li><b>Realism:</b> ersättningen är volatil och fallande (fler batterier driftsätts), och spotarbitraget är svagare i norra Sverige (SE2) med små prissvängningar. Räkna konservativt — bygg inte kalkylen på toppåren.</li>
+    </ul>
+
+    <h3>Risker att äga</h3>
+    <ul>
+      <li><b>Kapital:</b> vi finansierar varje installation → kapitalbindning och beroende av bra finansiering.</li>
+      <li><b>Pris- &amp; volymrisk (om energin buntas):</b> en kall + dyr vinter äter marginalen om den inte prissäkras. Prissäkring kostar spread.</li>
+      <li><b>Balans- &amp; kreditrisk:</b> som elhandlare bär vi balansansvar (kan läggas ut) och kreditrisk på kundernas fakturor.</li>
+      <li><b>Reglering:</b> som elleverantör gäller ellagen och konsumentskydd (ångerrätt, prisinfo, rätt att byta).</li>
+      <li><b>Prestanda &amp; klimat:</b> luft/vatten tappar verkningsgrad i sträng kyla när behovet toppar → bergvärme eller elbackup. Vi bär prestandarisken.</li>
+      <li><b>Residualvärde &amp; förtida avslut:</b> avtalsmodellen måste hantera vad som händer vid flytt/uppsägning.</li>
+    </ul>
+
+    <h3>Sekvensering</h3>
+    <ul>
+      <li><b>Fas 1:</b> sälj utrustning-som-tjänst (fast avgift), bunta in energin via white-label-partner, anslut batterier till aggregator. Låg byggtröskel.</li>
+      <li><b>Fas 2:</b> vid tillräcklig volym — ta hem elhandel och/eller aggregering för full spread + flexmarginal.</li>
+    </ul>
+
+    <h3>Att validera innan vi skalar</h3>
+    <ul>
+      <li>Faktiska grossist-/inköpspriser (sol, batteri, pump) — kalkylen bygger på antaganden i ett <code>CONFIG</code>-block.</li>
+      <li>Jämtkrafts aktuella fjärrvärme- och elnätstariff i Östersund.</li>
+      <li>Juridisk granskning av kund-, energi- och elhandelsavtal samt finansieringsupplägg.</li>
+    </ul>
+
+    <div class="dev-foot">// Prototyp. Indikativa siffror. Affärsmodell under utveckling — feedback välkomnas.</div>
+  </div>
+</div>
+
+<script>
+/* ====== JUSTERBARA ANTAGANDEN ====== */
+const CONFIG = {
+  /* OBS: kostnader nedan är VÅR inköps-/grossistnivå (inkl. egen arbetstid),
+     INTE slutkundspris. Justera till faktiska inköpspriser. */
+  solarYieldPerKwp: 800,      // kWh/kWp/år i Norrland (SE2)
+  solarCostPerKwp:  6500,     // vår allt-in kostnad per kWp (grossist + eget montage)
+  batteryCostPerKwh: 4000,    // vår kostnad per kWh
+  batteryKwh:        10,
+  heatPump: {
+    luftluft:  { cost: 16000,  reduction: 0.35, namn: 'Luft/luft-värmepump' },
+    luftvatten:{ cost: 70000,  reduction: 0.55, namn: 'Luft/vatten-värmepump' },
+    bergvarme: { cost: 150000, reduction: 0.70, namn: 'Bergvärmepump' }
+  },
+  waterborneConversion: 80000, // tillägg: vattenburet system om vattenburen pump saknar vattenkrets (margin kapar EJ detta)
+  fjarrvarmePris:   0.95,     // kr/kWh levererad värme (Östersund — kontrollera mot Jämtkrafts prislista)
+  scop: { luftvatten: 2.8, bergvarme: 3.3 }, // årsvärmefaktor vid byte FRÅN fjärrvärme
+  selfUseNoBattery: 0.35,     // andel solel som används direkt utan batteri
+  selfUseBattery:   0.62,     // ...med batteri
+  surplusPrice:     0.70,     // kr/kWh ersättning för såld överskottsel
+  financeRate:      0.06,     // årlig finansieringsränta
+  serviceMarkup:    1.35,     // täcker drift, övervakning, växelriktarbyte & marginal
+  heatShare: { direktel:0.70, olja:0.72, luftluft:0.55, effektiv:0.50 } // andel av förbrukning som är värme
+};
+
+const $ = id => document.getElementById(id);
+let chart;
+const fmt = n => Math.round(n).toLocaleString('sv-SE');
+
+function annuityMonthly(capex, ratePerYear, years){
+  const r = ratePerYear/12, n = years*12;
+  if(r===0) return capex/n;
+  return capex * r / (1 - Math.pow(1+r, -n));
+}
+
+function recommendPump(heating, heatingKwh, water){
+  if(heating==='fjarrvarme'){            // har alltid vattenburet → vattenburen pump
+    return heatingKwh>15000 ? 'bergvarme' : 'luftvatten';
+  }
+  if(heating==='direktel'||heating==='olja'){
+    if(water){                            // vattenkrets finns → vattenburen pump, ingen konvertering
+      if(heatingKwh>20000) return 'bergvarme';
+      if(heatingKwh>10000) return 'luftvatten';
+      return 'luftluft';
+    }
+    return 'luftluft';                    // ingen vattenkrets → luft/luft (slipp konvertering)
+  }
+  return null;                            // befintlig pump → ingen ny
+}
+
+function hasWaterborne(heating){
+  const ask = (heating==='direktel'||heating==='olja'||heating==='luftluft');
+  return ask ? ($('waterborne').value==='ja') : true; // fjärrvärme/befintlig effektiv pump = ja
+}
+
+function defaultWaterborne(heating){ return heating==='olja' ? 'ja' : 'nej'; }
+
+function syncFieldVisibility(heating){
+  const isFjarr = heating==='fjarrvarme';
+  $('fjarrField').style.display = isFjarr ? '' : 'none';
+  $('waterborneField').style.display =
+    (heating==='direktel'||heating==='olja'||heating==='luftluft') ? '' : 'none';
+  if(isFjarr){
+    $('consLabel').innerHTML = 'Hushållsel per år <span class="hint">(kWh, utan värme)</span>';
+    $('consPresets').style.display = 'none';
+  } else {
+    $('consLabel').innerHTML = 'Din elförbrukning per år <span class="hint">(inkl. uppvärmning)</span>';
+    $('consPresets').style.display = '';
+  }
+}
+
+function calc(){
+  const heating = $('heating').value;
+  const isFjarr = heating==='fjarrvarme';
+  const consumption = +$('consumption').value || 0; // fjärrvärme: hushållsel, annars total inkl värme
+  const price = +$('price').value || 0;
+  const roof = $('roof').value;
+  const incr = +$('incr').value/100;
+  const term = +$('term').value;
+  const fjarrKr = +$('fjarrKr').value || 0;
+  const water = hasWaterborne(heating);
+
+  // baslinje & värmebehov
+  let household, heatingKwh, nowY1;
+  if(isFjarr){
+    household = consumption;
+    heatingKwh = fjarrKr / CONFIG.fjarrvarmePris;   // levererad värme (kWh)
+    nowY1 = household*price + fjarrKr;
+  } else {
+    heatingKwh = consumption*CONFIG.heatShare[heating];
+    household = consumption - heatingKwh;
+    nowY1 = consumption*price;
+  }
+
+  // rekommenderad pump
+  const hp = recommendPump(heating, heatingKwh, water);
+  const useHP = $('togHP').dataset.on==='1' && !!hp;
+  $('hpDesc').textContent = hp ? ('Rek: '+CONFIG.heatPump[hp].namn) : 'Behövs ej';
+
+  // el för värme efter pump
+  let heatElAfter;
+  if(useHP){
+    heatElAfter = isFjarr ? heatingKwh/CONFIG.scop[hp]
+                          : heatingKwh*(1-CONFIG.heatPump[hp].reduction);
+  } else {
+    heatElAfter = isFjarr ? 0 : heatingKwh;
+  }
+  const consAfter = household + heatElAfter;
+
+  // sol
+  let pvKwp = 0;
+  if(roof!=='nej'){
+    pvKwp = Math.max(6, Math.min(roof==='delvis'?8:14, Math.round(consAfter/CONFIG.solarYieldPerKwp)));
+  }
+  const battRec = (pvKwp>=8 && roof==='ja');
+  $('pvDesc').textContent = pvKwp ? ('Rek: '+pvKwp+' kWp') : 'Tak saknas';
+  $('battDesc').textContent = battRec ? ('Rek: '+CONFIG.batteryKwh+' kWh') : 'Rek: nej';
+
+  const usePV   = $('togPV').dataset.on==='1' && pvKwp>0;
+  const useBatt = $('togBatt').dataset.on==='1' && usePV && battRec;
+  $('togHP').classList.toggle('on', useHP);
+  $('togPV').classList.toggle('on', usePV);
+  $('togBatt').classList.toggle('on', useBatt);
+
+  const usedKwp = usePV ? pvKwp : 0;
+  const solarProd = usedKwp*CONFIG.solarYieldPerKwp;
+  const selfUseRate = useBatt ? CONFIG.selfUseBattery : CONFIG.selfUseNoBattery;
+  const selfUsed = Math.min(solarProd*selfUseRate, consAfter);
+  const surplus = Math.max(solarProd - selfUsed, 0);
+  const gridKwh = Math.max(consAfter - selfUsed, 0);
+
+  // capex
+  let capex = 0, waterborneAdd = false;
+  if(useHP){
+    capex += CONFIG.heatPump[hp].cost;
+    if((hp==='luftvatten'||hp==='bergvarme') && !water){
+      capex += CONFIG.waterborneConversion; waterborneAdd = true;
+    }
+  }
+  if(usePV)   capex += usedKwp*CONFIG.solarCostPerKwp;
+  if(useBatt) capex += CONFIG.batteryKwh*CONFIG.batteryCostPerKwh;
+
+  const fee = capex>0 ? annuityMonthly(capex, CONFIG.financeRate, term)*CONFIG.serviceMarkup : 0;
+
+  // kvarvarande kostnad hos kund år 1
+  let remainElY1 = Math.max(gridKwh*price - surplus*CONFIG.surplusPrice, 0);
+  if(isFjarr && !useHP) remainElY1 += fjarrKr; // utan pump byts inte värmen
+
+  // utdata år 1
+  $('feeOut').innerHTML = fmt(fee)+' <span>kr/mån</span>';
+  $('nowMonth').textContent = fmt(nowY1/12)+' kr/mån';
+  $('svcMonth').textContent = fmt(fee + remainElY1/12)+' kr/mån';
+
+  // ackumulerat
+  const labels=[], cumNow=[], cumSvc=[];
+  let aN=0, aS=0, breakEven=null;
+  for(let t=1;t<=term;t++){
+    const f=Math.pow(1+incr,t-1);
+    aN += nowY1*f;
+    aS += fee*12 + remainElY1*f;
+    labels.push('År '+t); cumNow.push(aN); cumSvc.push(aS);
+    if(breakEven===null && aS<aN) breakEven=t;
+  }
+  const saving = aN - aS;
+
+  const v=$('verdict');
+  if(saving>0){
+    v.className='verdict win';
+    v.innerHTML = `Över ${term} år sparar du ca <b>${fmt(saving)} kr</b>`+
+      (breakEven?` — lönsamt från <b>år ${breakEven}</b>.`:`.`);
+  } else {
+    v.className='verdict even';
+    v.innerHTML = `Liknande totalkostnad — men <b>noll investering</b>, fast pris och vi tar risken.`;
+  }
+
+  // paketlista
+  const items=[];
+  if(useHP){
+    const sub = isFjarr ? ('SCOP ~'+CONFIG.scop[hp]) : ('−'+Math.round(CONFIG.heatPump[hp].reduction*100)+'% värme');
+    items.push([CONFIG.heatPump[hp].namn, sub]);
+  }
+  if(waterborneAdd) items.push(['Vattenburet system', 'inget fanns']);
+  if(usePV)   items.push(['Solceller '+usedKwp+' kWp', fmt(solarProd)+' kWh/år']);
+  if(useBatt) items.push(['Batteri '+CONFIG.batteryKwh+' kWh', 'högre egenanvändning']);
+  items.push(['Service, drift &amp; övervakning', 'ingår']);
+  items.push(['Total utrustning vi äger', fmt(capex)+' kr']);
+  $('pkgList').innerHTML = items.map(i=>`<li><span>${i[0]}</span><span class="pkg-em">${i[1]}</span></li>`).join('');
+
+  $('assump').innerHTML = `Räkneexempel för elområde SE2. Antaganden: solutbyte ${CONFIG.solarYieldPerKwp} kWh/kWp/år, `+
+    `egenanvändning ${Math.round(selfUseRate*100)}%, överskott ersätts med ${CONFIG.surplusPrice} kr/kWh, `+
+    `finansiering ${Math.round(CONFIG.financeRate*100)}% över ${term} år inkl. drift/marginal. `+
+    (isFjarr?`Fjärrvärme antas ${CONFIG.fjarrvarmePris} kr/kWh och ersätts av pump med SCOP ${CONFIG.scop[hp]||CONFIG.scop.luftvatten}. `:``)+
+    `Verklig offert baseras på hemanalys.`;
+
+  drawChart(labels, cumNow, cumSvc);
+}
+
+function drawChart(labels, now, svc){
+  const ctx=$('chart').getContext('2d');
+  const data={
+    labels,
+    datasets:[
+      {label:'Utan oss (dagens lösning)', data:now, borderColor:'#F2C77A', backgroundColor:'rgba(242,199,122,.12)', borderWidth:2.5, fill:true, tension:.25, pointRadius:0},
+      {label:'Med Solenergi Norr', data:svc, borderColor:'#7FD8B6', backgroundColor:'rgba(127,216,182,.12)', borderWidth:2.5, fill:true, tension:.25, pointRadius:0}
+    ]
+  };
+  const opts={
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'rgba(246,241,231,.8)',font:{family:'Hanken Grotesk',size:12},boxWidth:14}},
+      tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)+' kr'}}},
+    scales:{
+      x:{ticks:{color:'rgba(246,241,231,.5)',font:{size:10},maxTicksLimit:8},grid:{display:false}},
+      y:{ticks:{color:'rgba(246,241,231,.5)',font:{size:10},callback:v=>(v/1000)+'k'},grid:{color:'rgba(255,255,255,.07)'}}
+    }
+  };
+  if(chart){chart.data=data;chart.options=opts;chart.update();}
+  else chart=new Chart(ctx,{type:'line',data,options:opts});
+}
+
+// events
+['consumption','price','roof','term','fjarrKr','waterborne'].forEach(id=>$(id).addEventListener('input',calc));
+$('heating').addEventListener('change',()=>{
+  const h=$('heating').value;
+  if(h==='direktel'||h==='olja'||h==='luftluft') $('waterborne').value=defaultWaterborne(h);
+  syncFieldVisibility(h); calc();
+});
+$('incr').addEventListener('input',()=>{$('incrVal').textContent=$('incr').value;calc();});
+document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click',()=>{$('consumption').value=p.dataset.c;calc();}));
+['togHP','togPV','togBatt'].forEach(id=>$(id).addEventListener('click',()=>{
+  const e=$(id); e.dataset.on = e.dataset.on==='1'?'0':'1'; e.classList.toggle('on'); calc();
+}));
+syncFieldVisibility($('heating').value);
+calc();
+
+// Developer-info panel
+const devOverlay=$('devOverlay');
+const openDev=()=>devOverlay.classList.add('open');
+const closeDev=()=>devOverlay.classList.remove('open');
+$('devBtn').addEventListener('click',openDev);
+$('devClose').addEventListener('click',closeDev);
+devOverlay.addEventListener('click',e=>{ if(e.target===devOverlay) closeDev(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDev(); });
+</script>
+</body>
+</html>
