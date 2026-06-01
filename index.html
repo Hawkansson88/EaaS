@@ -200,6 +200,49 @@
   .dev-panel .dev-foot{margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);
     font-size:12px;font-family:ui-monospace,Menlo,monospace;opacity:.5}
   @media(max-width:600px){.dev-panel{padding:30px 22px 34px}.dev-panel h2{font-size:24px}}
+
+  /* RESPONSIVE / MOBILE */
+  @media(max-width:768px){
+    section{padding:62px 0}
+    header{padding:62px 0 56px}
+    .hero-cta .btn{flex:1 1 auto;text-align:center}
+    .strip .wrap{gap:12px 22px}
+  }
+  @media(max-width:600px){
+    body{font-size:16px}
+    .wrap{padding:0 18px}
+    nav .wrap{height:60px}
+    .logo{font-size:18px}
+    .logo .mark{width:26px;height:26px}
+    nav .btn{padding:9px 15px;font-size:14px}
+    header{padding:44px 0 42px}
+    header::after{width:380px;height:380px;top:-120px;right:-120px}
+    h1.title{font-size:34px}
+    .lead{font-size:17px;margin:20px 0 26px}
+    .strip .wrap{font-size:13px;justify-content:flex-start}
+    section{padding:48px 0}
+    .sec-head{margin-bottom:30px}
+    .sec-head p{font-size:16px}
+    .step{padding:24px 22px}
+    .calc-inputs,.calc-out{padding:26px 20px}
+    .out-fee .amount{font-size:46px}
+    .out-fee .amount span{font-size:18px}
+    .cmp .v{font-size:22px}
+    .why .card{padding:22px}
+    .cta{padding:34px 22px}
+    .hero-card{padding:24px}
+    .hero-card .big{font-size:44px}
+    .toggles .tog{flex:1 1 100%}
+    .dev-btn{font-size:12px;padding:9px 13px;right:12px;bottom:12px}
+    .dev-overlay{padding:20px 12px}
+    .dev-panel{margin:0 auto}
+  }
+  @media(max-width:420px){
+    h1.title{font-size:30px}
+    nav .btn{display:none}
+    .out-fee .amount{font-size:40px}
+    .compare{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
